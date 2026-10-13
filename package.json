@@ -1,0 +1,25 @@
+{
+  "name": "@nadia/common-parsers",
+  "version": "1.0.0",
+  "description": "Belegparser für Reiseunterlagen: PDF-Text rein, Reiseentwurf raus. Läuft im Browser, wird von der App dynamisch geladen.",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "check": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run",
+    "sign": "node scripts/sign.mjs",
+    "keygen": "node scripts/keygen.mjs",
+    "verify": "node scripts/verify.mjs"
+  },
+  "devDependencies": {
+    "@types/node": "^24.13.3",
+    "esbuild": "^0.28.2",
+    "pdfjs-dist": "^5.7.284",
+    "typescript": "^5.9.3",
+    "vitest": "^4.1.11"
+  },
+  "engines": {
+    "node": ">=24"
+  }
+}

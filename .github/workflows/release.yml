@@ -1,0 +1,47 @@
+# Tag v* → bauen, prüfen, signieren, als GitHub-Release veröffentlichen.
+#
+# Die App liest `…/releases/latest/download/manifest.json`. Ein neues Release
+# ist damit nach Ablauf des App-Caches (PARSERS_CACHE_SECONDS) aktiv — ohne
+# Deploy der App. Ungültige Signatur oder falscher Hash: die App lehnt ab und
+# bleibt beim zuletzt geprüften Stand.
+#
+# Secret PARSERS_SIGNING_KEY: privater Ed25519-Schlüssel (PEM) aus
+# `npm run keygen`. Ohne Secret bricht der Lauf ab — unsignierte Releases
+# nimmt keine Produktivinstanz an.
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npm run check
+      - run: npm test
+
+      - name: Version von Tag und package.json vergleichen
+        run: |
+          test "v$(node -p 'require("./package.json").version')" = "$GITHUB_REF_NAME" \
+            || { echo "Tag $GITHUB_REF_NAME passt nicht zu package.json"; exit 1; }
+
+      - run: npm run build
+      - run: npm run sign
+        env:
+          PARSERS_SIGNING_KEY: ${{ secrets.PARSERS_SIGNING_KEY }}
+      - run: npm run verify -- "${{ vars.PARSERS_PUBLIC_KEY }}"
+
+      - name: Release anlegen
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "$GITHUB_REF_NAME" dist/* --title "$GITHUB_REF_NAME" --notes "Signiertes Manifest und Parsermodule. Prüfen: npm run verify -- <PARSERS_PUBLIC_KEY>"
