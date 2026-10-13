@@ -54,6 +54,6 @@ test/           nur synthetische Belege (Musterfrau, Musterreisen GmbH)
 
 Weiter: [Vertrag](docs/vertrag.md) · [Parser schreiben](docs/parser-schreiben.md) · [Sicherheit und Release](docs/sicherheit.md)
 
-## Offen
+## Lizenz
 
-- **Lizenz fehlt.** Vor dem Veröffentlichen festlegen (z. B. MIT), sonst darf rechtlich niemand den Code nutzen
+MIT, siehe [LICENSE](LICENSE).

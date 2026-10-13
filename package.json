@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "Belegparser für Reiseunterlagen: PDF-Text rein, Reiseentwurf raus. Läuft im Browser, wird von der App dynamisch geladen.",
   "private": true,
+  "license": "MIT",
   "type": "module",
   "scripts": {
     "build": "node scripts/build.mjs",
