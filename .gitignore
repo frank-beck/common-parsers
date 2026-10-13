@@ -3,3 +3,8 @@ dist/
 *.pem
 .env
 .DS_Store
+
+# Echte Belege und alles daraus: nur auf diesem Rechner (docs/neuer-parser.md)
+privat/
+*.pdf
+!test/fixtures/*-muster.pdf

@@ -26,9 +26,8 @@ npm run keygen -- ~/parsers-signing.pem
 ## Release
 
 ```bash
-npm version 1.1.0 --no-git-tag-version
-git commit -am "release: 1.1.0"
-git tag v1.1.0 && git push --follow-tags
+npm version minor -m "release: %s"     # Commit + Tag v1.1.0
+git push --follow-tags
 ```
 
 [release.yml](../.github/workflows/release.yml): prüft, testet, baut, signiert, verifiziert, legt Release mit allen `dist/`-Dateien an.
@@ -43,4 +42,4 @@ Fest auf eine Version: `…/releases/download/v1.0.0`.
 
 ## Rückzug eines Parsers
 
-Fehlerhaften Parser entfernen oder Version heben, neues Release. Die App übernimmt es nach `PARSERS_CACHE_SECONDS`. Sofort: in der App `php artisan parsers:refresh` bzw. Deploy-Endpunkt `parsers-refresh`.
+Fehlerhaften Parser entfernen oder Version heben, neues Release. Die App übernimmt es nach `PARSERS_CACHE_SECONDS`. Sofort: NADIA → Admin → *Belegparser* → *Jetzt nachladen* (oder `php artisan parsers:refresh`, Deploy-Endpunkt `parsers-refresh`).

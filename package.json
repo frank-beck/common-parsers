@@ -6,6 +6,11 @@
   "license": "MIT",
   "type": "module",
   "scripts": {
+    "prepare": "git config core.hooksPath .githooks 2>/dev/null || true",
+    "neu": "node scripts/neu.mjs",
+    "lesen": "node scripts/lesen.mjs",
+    "datenschutz": "node scripts/datenschutz.mjs",
+    "pruefen": "npm run datenschutz && npm run check && npm test",
     "build": "node scripts/build.mjs",
     "check": "tsc -p tsconfig.json --noEmit",
     "test": "vitest run",

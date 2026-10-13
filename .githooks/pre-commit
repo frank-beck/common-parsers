@@ -1,0 +1,4 @@
+#!/bin/sh
+# Blockt Commits mit echten Kundendaten. Eingerichtet von `npm ci` (prepare).
+# Umgehen mit --no-verify nur, wenn du sicher bist: das Repository ist öffentlich.
+exec node scripts/datenschutz.mjs --staged
