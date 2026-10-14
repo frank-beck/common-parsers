@@ -1,6 +1,6 @@
 {
   "name": "@nadia/common-parsers",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Belegparser für Reiseunterlagen: PDF-Text rein, Reiseentwurf raus. Läuft im Browser, wird von der App dynamisch geladen.",
   "private": true,
   "license": "MIT",
