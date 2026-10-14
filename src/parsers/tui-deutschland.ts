@@ -8,26 +8,30 @@ const DATE = '\\d{1,2}\\.\\d{1,2}\\.\\d{4}';
 const DASH = '[–—-]';
 
 function parseFlights(pages: readonly PdfPage[]): DraftItem[] {
+  // „04.07.2028 Hinflug“ oder, bei Ankunft am Folgetag, „16.02.2027 –“ / „17.02.2027“ / „Hinflug“.
+  // Inlandsflüge einer Rundreise heißen nur „Flug“.
   const pattern = new RegExp(
-    `(${DATE})\\s+(Hinflug|Rückflug)\\s*\\n` +
+    `(${DATE})(?:\\s*${DASH}\\s*\\n?\\s*(${DATE}))?\\s+(Hinflug|Rückflug|Flug)\\s*\\n` +
       `\\s*Voraussichtliche Flugzeit:\\s*(\\d{1,2}:\\d{2})\\s*${DASH}\\s*(\\d{1,2}:\\d{2})\\s*Uhr[^\\n]*\\n` +
       `\\s*([^\\n>]{2,60})>\\s*([^\\n]{2,60})\\n` +
       `\\s*([^\\n]{2,60})`,
     'g'
   );
   return matchAll(pages, pattern).flatMap(({ group, evidence }) => {
-    const [direction, departure, arrival, from, to, operator] = [
+    const [rangeEnd, direction, departure, arrival, from, to, operator] = [
       group(1),
       group(2),
       group(3),
       group(4),
       group(5),
-      group(6)
+      group(6),
+      group(7)
     ];
     const date = germanDate(group(0));
     if (!date) return [];
-    // Landet der Flug nach Mitternacht, gehört die Ankunft auf den Folgetag.
+    // Landet der Flug nach Mitternacht, gehört die Ankunft auf den Folgetag — steht die Spanne da, gilt sie.
     const overnight = arrival < departure;
+    const endDate = germanDate(rangeEnd) ?? (overnight ? shiftDate(date, 1, 'day') : date);
     return [
       {
         kind: 'FLIGHT' as const,
@@ -36,7 +40,7 @@ function parseFlights(pages: readonly PdfPage[]): DraftItem[] {
         description: null,
         date,
         startTime: departure || null,
-        endDate: overnight ? shiftDate(date, 1, 'day') : date,
+        endDate,
         endTime: arrival || null,
         location: collapse(to),
         confirmationCode: /\b([A-Z]{1,3}\s?\d{2,5})\b/.exec(operator)?.[1]?.replace(/\s/g, '') ?? null,
@@ -53,7 +57,7 @@ function parseAccommodation(pages: readonly PdfPage[]): DraftItem[] {
       `\\s*Paket \\(Unterkunft\\)\\s*\\n` +
       `\\s*([^\\n]{3,80})\\n` +
       `\\s*([^\\n]{2,60})\\n` +
-      `([\\s\\S]{0,400}?)(?=\\n${DATE}|\\n[A-ZÄÖÜ][^\\n]{0,40}\\s/\\s)`,
+      `([\\s\\S]{0,2000}?)(?=\\n${DATE}|\\n[A-ZÄÖÜ][^\\n]{0,40}\\s/\\s)`,
     'g'
   );
   return matchAll(pages, pattern).flatMap(({ group, evidence }) => {
@@ -84,16 +88,20 @@ function parseAccommodation(pages: readonly PdfPage[]): DraftItem[] {
 }
 
 function parseGroundServices(pages: readonly PdfPage[]): DraftItem[] {
-  const pattern = new RegExp(`(${DATE})\\s+((?:Bustransfer|Kostenloses Zug zum Flug|Transfer)[^\\n]{0,80})`, 'g');
+  const pattern = new RegExp(`(${DATE})\\s+((?:Bustransfer|Kostenloses Zug zum Flug|Transfer|Minibus)[^\\n]{0,80})`, 'g');
   return matchAll(pages, pattern).flatMap(({ group, evidence }) => {
     const date = germanDate(group(0));
     if (!date) return [];
-    const label = collapse(group(1)).replace(/\s+(?:1[–—-]\d|\d[–—-]\d)\s.*$/, '');
+    // Teilnehmerspalte am Zeilenende: „ 1–5 im Paket“ oder nur „ 1“
+    const label = collapse(group(1))
+      .replace(/\s+(?:1[–—-]\d|\d[–—-]\d)\s.*$/, '')
+      .replace(/\s+\d$/, '');
     const train = /Zug zum Flug/i.test(label);
+    const minibus = /^Minibus/i.test(label);
     return [
       {
         kind: train ? ('TRAIN' as const) : ('TRANSFER' as const),
-        title: train ? 'Zug zum Flug' : 'Bustransfer',
+        title: train ? 'Zug zum Flug' : minibus ? 'Minibus-Transfer' : 'Bustransfer',
         subtitle: label.replace(/\s*\([A-Z0-9]{4,12}\)\s*$/, '') || null,
         description: null,
         date,
@@ -152,6 +160,20 @@ function parseTasks(
   payments: TripImportDraft['payments']
 ): DraftTask[] {
   const tasks: DraftTask[] = [];
+
+  // Optionsbuchung: „Ihr Urlaub ist bis zum 28.09.2026, 20:00 Uhr unverbindlich reserviert und wird danach automatisch gebucht.“
+  const option = matchFirst(pages, new RegExp(`bis zum\\s+(${DATE}),?\\s*(?:\\d{1,2}:\\d{2}\\s*Uhr)?\\s+unverbindlich reserviert`, 'i'));
+  if (option) {
+    tasks.push({
+      title: 'Reservierung wird automatisch gebucht',
+      description: 'Bis dahin unverbindlich. Danach gilt die Buchung, Storno nur nach den Reisebedingungen.',
+      dueOn: germanDate(option.value),
+      rule: 'unverbindlich reserviert, danach automatisch gebucht',
+      required: true,
+      travelerVisible: false,
+      evidence: option.evidence
+    });
+  }
 
   const balance = payments.find((payment) => payment.kind === 'BALANCE');
   const cardLimit = matchFirst(
@@ -217,7 +239,7 @@ function parseTasks(
 
 export const tuiDeutschlandParser: DocumentParser = {
   id: 'tui-deutschland',
-  version: '1.0.0',
+  version: '1.1.0',
   family: 'TUI Deutschland',
   label: 'TUI Deutschland — Buchungsbestätigung / Rechnung',
 
@@ -244,11 +266,11 @@ export const tuiDeutschlandParser: DocumentParser = {
 
     draft.participants = matchAll(
       pages,
-      new RegExp(`(?:^|\\n)\\s*(\\d)\\s+(?:Herr|Frau|Herrn)\\s+([^\\n(]{3,60})\\((${DATE})\\)`, 'g')
+      new RegExp(`(?:^|\\n)\\s*(\\d)\\s+(Herr|Frau|Herrn|Kind)\\s+([^\\n(]{3,60})\\((${DATE})\\)`, 'g')
     ).map(({ group }) => ({
-      displayName: personName(group(1)),
-      birthDate: germanDate(group(2)),
-      kind: group(0) === '1' ? ('PRIMARY' as const) : ('COMPANION' as const)
+      displayName: personName(group(2)),
+      birthDate: germanDate(group(3)),
+      kind: group(0) === '1' ? ('PRIMARY' as const) : group(1) === 'Kind' ? ('CHILD' as const) : ('COMPANION' as const)
     }));
     if (!draft.customer.displayName && draft.participants[0]) {
       draft.customer.displayName = draft.participants[0].displayName;
@@ -267,17 +289,36 @@ export const tuiDeutschlandParser: DocumentParser = {
       draft.endsOn = draft.startsOn;
       warnings.push('Reisezeitraum aus dem Vertragsbeginn abgeleitet — bitte prüfen.');
     }
+    // TUI schreibt „Herr“/„Frau“ auch vor Minderjährige; Kind ist, wer bei Reisebeginn unter 18 ist.
+    const adultSince = shiftDate(draft.startsOn, -18 * 12, 'month');
+    for (const participant of draft.participants) {
+      if (participant.kind === 'COMPANION' && participant.birthDate && adultSince && participant.birthDate > adultSince) {
+        participant.kind = 'CHILD';
+      }
+    }
 
-    const hotel = items.find((item) => item.kind === 'HOTEL');
-    const arrival = items.find((item) => item.kind === 'FLIGHT' && /^Hinflug/.test(item.title));
-    const airportCity = arrival?.location?.replace(/\s*\([A-Z]{3}\)\s*$/, '').replace(/\s+(Süd|Nord|West|Ost)$/i, '');
-    draft.destination = collapse(airportCity ?? hotel?.location ?? '') || null;
-    draft.title = hotel ? `${draft.destination ?? 'Reise'} · ${hotel.title}` : (draft.destination ?? null);
-    draft.summary = hotel?.subtitle ?? null;
+    const hotels = items.filter((item) => item.kind === 'HOTEL');
+    const hotel = hotels[0];
+    if (hotels.length > 1) {
+      // Rundreise: Ziel ist das Land, Titel die Stationen
+      const places = [...new Set(hotels.map((item) => item.location).filter((place): place is string => Boolean(place)))];
+      const region = guessRegion(`${places.join(' ')} ${joinedText(pages).slice(0, 4_000)}`);
+      draft.destinationCountry = region.country;
+      if (region.timeZone) draft.destinationTimeZone = region.timeZone;
+      draft.destination = region.country ?? places[0] ?? null;
+      draft.title = [region.country, places.join(', ')].filter(Boolean).join(': ') || null;
+      draft.summary = hotels.map((item) => item.title).join(' · ');
+    } else {
+      const arrival = items.find((item) => item.kind === 'FLIGHT' && /^Hinflug/.test(item.title));
+      const airportCity = arrival?.location?.replace(/\s*\([A-Z]{3}\)\s*$/, '').replace(/\s+(Süd|Nord|West|Ost)$/i, '');
+      draft.destination = collapse(airportCity ?? hotel?.location ?? '') || null;
+      draft.title = hotel ? `${draft.destination ?? 'Reise'} · ${hotel.title}` : (draft.destination ?? null);
+      draft.summary = hotel?.subtitle ?? null;
 
-    const region = guessRegion(`${draft.destination ?? ''} ${hotel?.location ?? ''} ${joinedText(pages).slice(0, 4_000)}`);
-    draft.destinationCountry = region.country;
-    if (region.timeZone) draft.destinationTimeZone = region.timeZone;
+      const region = guessRegion(`${draft.destination ?? ''} ${hotel?.location ?? ''} ${joinedText(pages).slice(0, 4_000)}`);
+      draft.destinationCountry = region.country;
+      if (region.timeZone) draft.destinationTimeZone = region.timeZone;
+    }
 
     draft.payments = parsePayments(pages);
     if (draft.payments.filter((payment) => payment.kind !== 'TOTAL').length === 0) {
@@ -289,13 +330,41 @@ export const tuiDeutschlandParser: DocumentParser = {
     if (baggage) draft.notes.push(collapse(baggage.value));
     const minimumAge = matchFirst(pages, /gilt ein Mindestalter von\s+(\d{1,2})\s+Jahren/i, 0);
     if (minimumAge) draft.notes.push(collapse(minimumAge.value));
-    const board = hotel?.subtitle?.match(/(Halbpension|Vollpension|All Inclusive|Frühstück)/i)?.[1];
-    if (board) draft.inclusions.push(board);
-    if (items.some((item) => item.kind === 'TRANSFER')) draft.inclusions.push('Bustransfer');
+    const boards = hotels.map((item) => item.subtitle?.match(/(Halbpension|Vollpension|All Inclusive|Frühstück)/i)?.[1]);
+    for (const board of new Set(boards.filter((b): b is string => Boolean(b)))) draft.inclusions.push(board);
+    if (items.some((item) => item.title === 'Bustransfer')) draft.inclusions.push('Bustransfer');
+    if (items.some((item) => item.title === 'Minibus-Transfer')) draft.inclusions.push('Minibus-Transfer');
     if (items.some((item) => item.kind === 'TRAIN')) draft.inclusions.push('Zug zum Flug');
 
-    const advisor = matchFirst(pages, /\n(TS Traumreisen GmbH|[A-ZÄÖÜ][^\n]{2,60}(?:Reisen|Reisebüro)[^\n]{0,20})\n/);
-    if (advisor) {
+    // Block „Ihre Daten# Agentur oder Reisebüro#“: erst Kundschaft, nach „Versand des Reiseplans“ das Reisebüro.
+    const [customerBlock] = matchAll(
+      pages,
+      /Ihre Daten#[^\n]*\n(?:Herrn?|Frau)?\s*[^\n]+\n([^\n]+)\n([^\n]+)\n(?:Telefon:\s*([^\n]+)\n)?(?:Telefon Mobil:\s*([^\n]+)\n)?(?:E-Mail:\s*(\S+))?/
+    );
+    if (customerBlock) {
+      draft.customer.address = `${customerBlock.group(0)}, ${customerBlock.group(1).replace(/^[A-Z]{1,2}\s?-\s?/, '')}`;
+      draft.customer.phone = customerBlock.group(3) || customerBlock.group(2) || null;
+      draft.customer.email = customerBlock.group(4) || null;
+    }
+    const [office] = matchAll(
+      pages,
+      /Versand des Reiseplans:[^\n]*\n([^\n]+)\n([^\n]+)\n([^\n]+)\n(?:Telefon:\s*([^\n]+)\n)?(?:E-Mail:\s*(\S+))?/
+    );
+    // Ohne den Block: Firmenname mit „Reisen“/„Reisebüro“, keine Überschrift („…#“)
+    const advisor = office
+      ? null
+      : matchFirst(pages, /\n(TS Traumreisen GmbH|[A-ZÄÖÜ][^\n#]{2,60}(?:Reisen|Reisebüro)[^\n#]{0,20})\n/);
+    if (office) {
+      draft.contacts.push({
+        kind: 'ADVISOR',
+        title: 'Ihr Reisebüro',
+        name: office.group(0),
+        phone: office.group(3) || null,
+        email: office.group(4) || null,
+        address: `${office.group(1)}, ${office.group(2).replace(/^[A-Z]{1,2}\s?-\s?/, '')}`,
+        notes: null
+      });
+    } else if (advisor) {
       draft.contacts.push({
         kind: 'ADVISOR',
         title: 'Ihr Reisebüro',
@@ -315,15 +384,15 @@ export const tuiDeutschlandParser: DocumentParser = {
       address: matchFirst(pages, /TUI Deutschland GmbH\s*·\s*([^\n·]{5,60}·[^\n]{5,40})/)?.value ?? null,
       notes: null
     });
-    if (hotel) {
+    for (const item of hotels) {
       draft.contacts.push({
         kind: 'HOTEL',
-        title: hotel.title,
-        name: hotel.title,
+        title: item.title,
+        name: item.title,
         phone: null,
         email: null,
-        address: hotel.location,
-        notes: hotel.subtitle
+        address: item.location,
+        notes: item.subtitle
       });
     }
 

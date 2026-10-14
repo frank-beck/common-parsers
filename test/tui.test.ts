@@ -5,6 +5,7 @@ import { tuiCruisesParser } from '../src/parsers/tui-cruises.js';
 import { tuiDeutschlandParser } from '../src/parsers/tui-deutschland.js';
 import { parsers } from '../src/parsers/index.js';
 import { selectParser as select } from '../src/core/select.js';
+import { musterPages } from './muster.js';
 
 const selectParser = (input: PdfPage[]) => select(parsers, input);
 
@@ -246,5 +247,91 @@ describe('Parserauswahl', () => {
     const cruiseText = `${CRUISE_PAGE_ONE}\nTUI Deutschland GmbH als Vermittler`;
     assert.equal(selectParser(pages(cruiseText))?.parser.id, 'tui-cruises');
     assert.equal(tuiDeutschlandParser.detect(pages(cruiseText)), 0);
+  });
+});
+
+describe('TUI-Deutschland-Rundreise (Muster test/fixtures/tui-rbe-muster.txt)', () => {
+  const { draft, warnings } = tuiDeutschlandParser.parse(musterPages('tui-rbe-muster.txt'));
+
+  it('Hinflug über Nacht: Datumsspanne vor „Hinflug“ gilt', () => {
+    const outbound = draft.items.find((item) => item.title.startsWith('Hinflug'));
+    assert.deepEqual(
+      [outbound?.date, outbound?.startTime, outbound?.endDate, outbound?.endTime],
+      ['2027-02-16', '21:15', '2027-02-17', '14:20']
+    );
+    assert.deepEqual(warnings, []);
+  });
+
+  it('liest Inlandsflug, alle Hotels und Minibus-Transfers', () => {
+    assert.deepEqual(
+      draft.items.filter((item) => item.kind === 'FLIGHT').map((item) => [item.date, item.confirmationCode]),
+      [
+        ['2027-02-16', 'DE2574'],
+        ['2027-02-21', 'PG275'],
+        ['2027-03-04', 'DE2369']
+      ]
+    );
+    assert.deepEqual(
+      draft.items.filter((item) => item.kind === 'HOTEL').map((item) => [item.title, item.date, item.endDate, item.location]),
+      [
+        ['Tower Club at Lebua', '2027-02-17', '2027-02-21', 'Bangkok'],
+        ['Katathani Phuket Beach Resort', '2027-02-21', '2027-02-26', 'Kata Noi Beach'],
+        ['ROBINSON KHAO LAK', '2027-02-26', '2027-03-04', 'Khao Lak']
+      ]
+    );
+    assert.deepEqual(
+      draft.items.filter((item) => item.kind === 'TRANSFER').map((item) => [item.date, item.title]),
+      [
+        ['2027-02-17', 'Bustransfer'],
+        ['2027-02-21', 'Minibus-Transfer'],
+        ['2027-02-26', 'Minibus-Transfer'],
+        ['2027-03-04', 'Bustransfer']
+      ]
+    );
+    assert.equal(draft.startsOn, '2027-02-16');
+    assert.equal(draft.endsOn, '2027-03-04');
+  });
+
+  it('Rundreise: Land als Ziel, Stationen als Titel', () => {
+    assert.equal(draft.title, 'Thailand: Bangkok, Kata Noi Beach, Khao Lak');
+    assert.equal(draft.destinationTimeZone, 'Asia/Bangkok');
+  });
+
+  it('Kinder nach Zeile „Kind“ und nach Alter bei Reisebeginn', () => {
+    assert.deepEqual(
+      draft.participants.map((p) => [p.displayName, p.kind]),
+      [
+        ['Max Mustermann', 'PRIMARY'],
+        ['Erika Musterfrau', 'COMPANION'],
+        ['Lena Beispiel', 'CHILD'],
+        ['Paul Mustermann', 'CHILD'],
+        ['Mia Mustermann', 'CHILD']
+      ]
+    );
+  });
+
+  it('Kundschaft und Reisebüro aus „Ihre Daten“', () => {
+    assert.deepEqual(draft.customer, {
+      displayName: 'Max Mustermann',
+      email: 'kontakt1@example.com',
+      phone: '+49 (0)700 1234567',
+      address: 'Testweg 2, 12345 Teststadt'
+    });
+    const advisor = draft.contacts.find((contact) => contact.kind === 'ADVISOR');
+    assert.deepEqual(
+      [advisor?.name, advisor?.phone, advisor?.email, advisor?.address],
+      ['Reisebüro Muster GmbH', '+49 (0)700 7654321', 'kontakt2@example.com', 'Testweg 3, 12345 Teststadt']
+    );
+  });
+
+  it('Optionsfrist und Zahlungen als interne Aufgaben', () => {
+    assert.deepEqual(
+      draft.tasks.map((task) => [task.title, task.dueOn, task.travelerVisible]),
+      [
+        ['Reservierung wird automatisch gebucht', '2026-09-28', false],
+        ['Anzahlung fällig', '2026-09-28', false],
+        ['Restzahlung fällig', '2027-01-19', false]
+      ]
+    );
   });
 });

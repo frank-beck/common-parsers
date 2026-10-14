@@ -4,15 +4,18 @@
 //   npm run lesen -- privat/beleg.pdf      PDF mit Textschicht
 //   npm run lesen -- privat/beleg.txt      Text, z. B. aus der Texterkennung der App
 //   … --json                               zusätzlich den ganzen Entwurf
+//   … --anonym                             Ersetzungen automatisch nach privat/ersetzen.txt (scripts/anonym.mjs)
 //
 // Schreibt privat/<name>.txt (echter Text) und, wenn privat/ersetzen.txt da ist,
 // privat/<name>.muster.txt mit erfundenen Angaben. Nichts verlässt den Rechner.
 // Nicht von einer KI ausführen lassen: die Ausgabe enthält den echten Beleg.
-import { existsSync, readFileSync, writeFileSync } from 'node:fs';
+import { execFileSync } from 'node:child_process';
+import { appendFileSync, existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { basename, dirname, extname, join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { build } from 'esbuild';
-import { alsWort, pruefe } from './datenschutz.mjs';
+import { ersetze, ersetzungen } from './anonym.mjs';
+import { echteAngaben, pruefe } from './datenschutz.mjs';
 import { seitenAlsText, seitenAusText } from './seiten.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
@@ -83,6 +86,28 @@ if (pdf) {
 
 // Erfundene Fassung: jede linke Seite aus privat/ersetzen.txt durch die rechte.
 const ersetzen = join(privat, 'ersetzen.txt');
+if (args.includes('--anonym')) {
+  const treffer = selectParser(parsers, pages);
+  const { draft } = (treffer?.parser ?? parsers.find((p) => p.fallback)).parse(pages);
+  const bekannt = new Set(echteAngaben(ersetzen).map((echt) => echt.toLowerCase()));
+  // Steht schon im Repository → öffentlich (Veranstalter, Hotline), nicht in die Sperrliste.
+  // Namen und Geburtsdaten nie: ein echter „Max“ darf nicht durchrutschen, weil Tests „Max“ verwenden.
+  const oeffentlich = execFileSync('git', ['ls-files', '-z'], { cwd: root })
+    .toString()
+    .split('\0')
+    .filter((datei) => datei && !/\.(pdf|png|jpe?g)$|package-lock\.json$/i.test(datei) && existsSync(join(root, datei)))
+    .map((datei) => readFileSync(join(root, datei), 'utf8').toLowerCase())
+    .join('\n');
+  const neu = ersetzungen(draft, seitenAlsText(pages)).filter(
+    ({ echt, art }) =>
+      !bekannt.has(echt.toLowerCase()) && (art === 'Name' || art === 'Geburtsdatum' || !oeffentlich.includes(echt.toLowerCase()))
+  );
+  const vorher = existsSync(ersetzen) ? readFileSync(ersetzen, 'utf8') : '';
+  const zeilen = [`# automatisch aus ${name}, ${new Date().toISOString().slice(0, 10)} — prüfen`, ...neu.map((e) => `${e.echt} = ${e.erfunden}`)];
+  appendFileSync(ersetzen, `${vorher && !vorher.endsWith('\n') ? '\n' : ''}${zeilen.join('\n')}\n`);
+  const arten = Object.entries(Object.groupBy(neu, (e) => e.art)).map(([art, liste]) => `${art} ${liste.length}`);
+  console.log(`Anonym: ${neu.length} neue Ersetzungen in privat/ersetzen.txt (${arten.join(', ') || 'keine'})`);
+}
 if (existsSync(ersetzen)) {
   const paare = readFileSync(ersetzen, 'utf8')
     .split('\n')
@@ -90,12 +115,7 @@ if (existsSync(ersetzen)) {
     .map((line) => line.split('=').map((part) => part.trim()))
     .filter(([echt]) => echt.length >= 3)
     .sort((a, b) => b[0].length - a[0].length);
-  let muster = seitenAlsText(pages);
-  for (const [echt, erfunden = 'MUSTER'] of paare) {
-    muster = muster.replace(new RegExp(alsWort(echt).source, 'giu'), (treffer) =>
-      treffer === treffer.toUpperCase() ? erfunden.toUpperCase() : erfunden
-    );
-  }
+  const muster = ersetze(seitenAlsText(pages), paare);
   const datei = `privat/${name}.muster.txt`;
   writeFileSync(join(root, datei), muster);
   console.log(`Muster: ${datei}  (${paare.length} Ersetzungen — jetzt lesen, Rest von Hand ersetzen)`);

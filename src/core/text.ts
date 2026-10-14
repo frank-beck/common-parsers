@@ -139,7 +139,8 @@ const COUNTRY_BY_KEYWORD: readonly (readonly [RegExp, string, string])[] = [
   [/\b(?:Namibia|Windhoek)\b/i, 'Namibia', 'Africa/Windhoek'],
   [/\b(?:Island|Reykjavik)\b/i, 'Island', 'Atlantic/Reykjavik'],
   [/\b(?:Norwegen|Oslo|Bergen|Nordkap)\b/i, 'Norwegen', 'Europe/Oslo'],
-  [/\b(?:Ägypten|Hurghada|Kairo)\b/i, 'Ägypten', 'Africa/Cairo']
+  [/\b(?:Ägypten|Hurghada|Kairo)\b/i, 'Ägypten', 'Africa/Cairo'],
+  [/\b(?:Thailand|Bangkok|Phuket|Khao Lak|Krabi|Koh Samui|Chiang Mai)\b/i, 'Thailand', 'Asia/Bangkok']
 ];
 
 /**

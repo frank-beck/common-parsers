@@ -8,8 +8,8 @@ Für: ein Veranstalterbeleg, den NADIA noch nicht erkennt. Ziel: Parser live, oh
 |---|---|---|---|
 | 0 | Einmal einrichten | `npm ci` | 1 min |
 | 1 | Echten Beleg lesen | `npm run lesen -- privat/beleg.pdf` | 2 min |
-| 2 | Ersetzungsliste schreiben | `privat/ersetzen.txt` | 5 min |
-| 3 | Muster lesen — **Pflicht** | Augen | 5 min |
+| 2 | Ersetzungsliste, automatisch | `npm run lesen -- privat/beleg.pdf --anonym` | 2 min |
+| 3 | Muster prüfen — **Pflicht** | Namenssuche + Stellen mit Kundendaten | 10 min |
 | 4 | Gerüst anlegen | `npm run neu -- <id> "<Veranstalter>"` | 1 min |
 | 5 | Parser schreiben, bis Tests grün | mit KI erlaubt, nur am Muster | 10–30 min |
 | 6 | Gegen echten Beleg prüfen | `npm run lesen -- privat/beleg.pdf` | 2 min |
@@ -83,7 +83,14 @@ Entwurf: …
 
 ## 2. Ersetzungsliste
 
-`privat/ersetzen.txt`, je Zeile `echt = erfunden`:
+**Automatisch:** `npm run lesen -- privat/beleg.pdf --anonym` schreibt Ersetzungen nach `privat/ersetzen.txt` und baut das Muster (`scripts/anonym.mjs`).
+
+| Findet | Findet nicht |
+|---|---|
+| Namen und Geburtsdaten, die der Parser erkennt; Reisebüro aus dem Parser | Namen, die der Parser nicht erkennt — bei `generic` fast alle |
+| E-Mail, IBAN, Telefon, Nummern ab 6 Ziffern, Anschriftblock (Straße / PLZ Ort je eigene Zeile) | Anschrift in einer Zeile, Name der Beratung, Nummern unter 6 Ziffern |
+
+Danach trotzdem Schritt 3. Von Hand, je Zeile `echt = erfunden`:
 
 ```
 # Personen — Vor- und Nachnamen einzeln, auch Mitreisende und Kinder
@@ -118,11 +125,42 @@ npm run lesen -- privat/beleg.pdf
 | Reisedaten: Tage verschieben, Jahr auf 2027/2028 | Beträge (ruhig runden) |
 | Name des Reisebüros und der Beratung | |
 
-## 3. Muster lesen — Pflicht
+## 3. Muster prüfen — Pflicht
 
-`privat/beleg.muster.txt` öffnen, **jede Zeile** lesen. Die Ersetzungsliste findet nur, was in ihr steht.
+**Warum:** Das Muster kommt ins öffentliche Repository. Die Ersetzung findet nur, was in `ersetzen.txt` steht oder einem festen Muster folgt — der Rest bleibt echt. Gemessen 14.10.2026: nach `--anonym` standen im TUI-Muster noch Vorname und Geburtsdatum eines Kindes, die Kundenanschrift, Teile der Mobilnummer.
 
-- Stehen noch Namen, Nummern, Daten der Kundschaft drin? → in `ersetzen.txt` nachtragen, Schritt 2 wiederholen
+Drei Prüfungen, in dieser Reihenfolge:
+
+**a) Namenssuche über die ganze Datei** — alle Vor- und Nachnamen, **auch Kinder**, dazu Straße und Ort:
+
+```bash
+grep -inE "Nachname|Vorname1|Vorname2|Kind1|Kind2|Straße|Wohnort" privat/beleg.muster.txt
+```
+
+Platzhalter durch die echten Werte ersetzen. Kein `#`-Kommentar dahinter (zsh liest ihn als Dateinamen). Ausgabe leer → weiter. Namen stehen auch außerhalb der Teilnehmerliste: Anrede, Freigepäck, Tickets (`NACHNAME/VORNAME`).
+
+**b) Die Stellen mit Kundendaten Zeile für Zeile:**
+
+| Veranstalter | Stellen |
+|---|---|
+| TUI Deutschland | Anrede Seite 1 · Teilnehmerliste „1 Herr …“ bis „5 Kind …“ · Block „Ihre Daten# Agentur oder Reisebüro#“ (Anschrift, Telefon, Mobil, E-Mail, Kunden-, Rechnungs-, Steuernummer) |
+| DERTOUR | Kopf Seite 1 („Buchungsstelle“, Rechnungs-, Vorgangsnummer) · Anrede · „Anmelder/in“ und Reisendenliste · Freigepäck · Flug-/Airline-Buchungscode |
+| neuer Veranstalter | Kopf, Anrede, Teilnehmerliste, Kontaktblock, jede Zeile mit Nummer; danach hier eintragen |
+
+**c) Rest überfliegen:** Steht irgendwo noch ein Name, eine Nummer, ein Geburtsdatum?
+
+Fund → in `ersetzen.txt` nachtragen, Schritt 2 wiederholen.
+
+| Darf bleiben | Muss raus |
+|---|---|
+| Geschäftsführung, HRB, USt-ID, Anschrift, Hotline des **Veranstalters** | alles zu Kundschaft und Mitreisenden |
+| Hotels, Flugnummern, Sitzplätze, Preise | Reisebüro: Name, Anschrift, Telefon, Steuernummer, Beratung |
+| Platzhalter des Veranstalters („Tba“ bei DERTOUR) | Buchungs-, Rechnungs-, Kunden-, Ticketnummern |
+
+Faustregel: Steht es so auf jedem Beleg des Veranstalters → bleibt. Betrifft es nur diese Buchung → raus.
+
+Weiteres:
+
 - Struktur **nicht** glätten: Zeilenumbrüche, doppelte Leerzeichen, verdrehte Reihenfolge sind genau das, was der Parser später sieht
 - Lange Belege kürzen ist erlaubt: AGB-Seiten, Werbung raus; je Abschnittsart (Flug, Hotel, Zahlung) ein Beispiel behalten
 

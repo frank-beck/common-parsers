@@ -11,7 +11,7 @@ Belegparser für Reiseunterlagen. PDF-Text rein, Reiseentwurf raus.
 | Parser | Version | Erkennt |
 |---|---|---|
 | `tui-cruises` | 1.0.0 | TUI Cruises / Mein Schiff — Reisebestätigung / Rechnung |
-| `tui-deutschland` | 1.0.0 | TUI Deutschland — Buchungsbestätigung / Rechnung |
+| `tui-deutschland` | 1.1.0 | TUI Deutschland — Buchungsbestätigung / Rechnung, auch Rundreisen |
 | `dertour-angebot` | 1.0.0 | DERTOUR — Unverbindliches Angebot |
 | `generic` | 1.0.0 | Auffang: rät nichts, listet Daten, Beträge, Buchungsnummern |
 

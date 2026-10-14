@@ -7,11 +7,6 @@ import { collapse, euroCents, germanDate, guessRegion, matchAll, matchFirst, shi
 const DATE = '\\d{1,2}\\.\\d{1,2}\\.\\d{4}';
 const STATUS = 'Angebot';
 
-// Nicht in guessRegion: dort geändert, änderte sich das Ergebnis der TUI-Parser.
-const REGIONS: readonly (readonly [RegExp, string, string])[] = [
-  [/\b(?:Thailand|Bangkok|Phuket|Khao Lak|Krabi|Koh Samui|Chiang Mai)\b/i, 'Thailand', 'Asia/Bangkok']
-];
-
 interface Line {
   text: string;
   page: number;
@@ -269,8 +264,7 @@ export const dertourAngebotParser: DocumentParser = {
 
     const places = [...new Set(draft.items.filter((item) => item.kind === 'HOTEL').map((item) => item.location).filter(Boolean))];
     const regionText = `${places.join(' ')} ${joinedText(pages).slice(0, 4_000)}`;
-    const known = REGIONS.find(([pattern]) => pattern.test(regionText));
-    const { country, timeZone } = known ? { country: known[1], timeZone: known[2] } : guessRegion(regionText);
+    const { country, timeZone } = guessRegion(regionText);
     draft.destinationCountry = country;
     if (timeZone) draft.destinationTimeZone = timeZone;
     draft.destination = country ?? places[0] ?? null;
