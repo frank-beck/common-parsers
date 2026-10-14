@@ -18,8 +18,8 @@ const CRUISE_PAGE_ONE = [
   'Ihr Reisedatum: 04.05. - 12.05.2028',
   'Frau',
   'ERIKA MUSTERFRAU',
-  'TESTWEG 1',
-  '12345 TESTSTADT',
+  'MUSTERSTRASSE 1',
+  '12345 MUSTERSTADT',
   'Reisebestätigung / Rechnung',
   'Vorgang-Nr.: 9999999/1',
   'Datum: 01.03.2027',
@@ -27,10 +27,10 @@ const CRUISE_PAGE_ONE = [
   'Änderungswünsche an:',
   'Musterreisen GmbH',
   '.',
-  'Tel: +49 700 1234567',
+  'Tel: +49 000 1111111',
   'Teilnehmer Preis pro Person Alter/Geburtsdatum',
   '1.000,00 € 1. Frau MUSTERFRAU/ERIKA 01.01.1970',
-  '1.000,00 € 2. Herr MUSTERMANN/MAX 02.02.1972',
+  '1.000,00 € 2. Herr MUSTERMANN/MAX 01.01.1972',
   '1-2 04.05.2028 -',
   '11.05.2028',
   'Mein Schiff 9',
@@ -157,7 +157,7 @@ const PACKAGE_PAGE = [
   'Musterreisen GmbH',
   'Teilnehmerpreise',
   '1 Frau Erika Musterfrau (01.01.1970) 900,00 €',
-  '2 Herr Max Mustermann (02.02.1972) 900,00 €',
+  '2 Herr Max Mustermann (01.01.1972) 900,00 €',
   'Gesamtpreis 1.800,00 €',
   'Zahlungsinformationen #',
   'Zahlungsart: Kreditkarte (Mastercard) Gesamtpreis: 1.800,00 €',
@@ -253,6 +253,11 @@ describe('Parserauswahl', () => {
 describe('TUI-Deutschland-Rundreise (Muster test/fixtures/tui-rbe-muster.txt)', () => {
   const { draft, warnings } = tuiDeutschlandParser.parse(musterPages('tui-rbe-muster.txt'));
 
+  it('Fundstellen bleiben unter der Grenze des Servers (1000 Zeichen)', () => {
+    const lengths = draft.items.map((item) => item.evidence?.excerpt.length ?? 0);
+    assert.ok(Math.max(...lengths) <= 1000, `längster Auszug: ${Math.max(...lengths)} Zeichen`);
+  });
+
   it('Hinflug über Nacht: Datumsspanne vor „Hinflug“ gilt', () => {
     const outbound = draft.items.find((item) => item.title.startsWith('Hinflug'));
     assert.deepEqual(
@@ -314,13 +319,13 @@ describe('TUI-Deutschland-Rundreise (Muster test/fixtures/tui-rbe-muster.txt)', 
     assert.deepEqual(draft.customer, {
       displayName: 'Max Mustermann',
       email: 'kontakt1@example.com',
-      phone: '+49 (0)700 1234567',
-      address: 'Testweg 2, 12345 Teststadt'
+      phone: '+49 (0)000 1111111',
+      address: 'Musterstraße 2, 12345 Musterstadt'
     });
     const advisor = draft.contacts.find((contact) => contact.kind === 'ADVISOR');
     assert.deepEqual(
       [advisor?.name, advisor?.phone, advisor?.email, advisor?.address],
-      ['Reisebüro Muster GmbH', '+49 (0)700 7654321', 'kontakt2@example.com', 'Testweg 3, 12345 Teststadt']
+      ['Reisebüro Muster GmbH', '+49 (0)000 1111110', 'kontakt2@example.com', 'Musterstraße 3, 12345 Musterstadt']
     );
   });
 

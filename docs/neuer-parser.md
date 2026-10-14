@@ -37,9 +37,36 @@ Schutz, der schon eingebaut ist — **kein Ersatz für Schritt 3**:
 | Schutz | Was er tut | Was nicht |
 |---|---|---|
 | `.gitignore` | `privat/` und `*.pdf` außer `test/fixtures/*-muster.pdf` | `git add -f` umgeht ihn |
-| Commit-Sperre `.githooks/pre-commit` | bricht den Commit ab bei: Angaben aus `privat/ersetzen.txt`, Belegdateien außerhalb `test/fixtures/*-muster.*`, E-Mails mit echter Domain, gültigen IBANs, Mobilnummern | Namen, Geburtsdaten, Adressen, die **nicht** in `ersetzen.txt` stehen |
+| Commit-Sperre `.githooks/pre-commit` | bricht den Commit ab bei: Angaben aus `privat/ersetzen.txt`, Belegdateien außerhalb `test/fixtures/*-muster.*`, E-Mails mit echter Domain, gültigen IBANs, Mobilnummern; unter `test/` Namen, Geburtsdaten, PLZ Ort, Telefon außerhalb des Pools | Namen ohne Anrede, Straßen ohne PLZ-Zeile, die **nicht** in `ersetzen.txt` stehen |
 | `.claude/settings.json` | Claude Code darf `privat/` nicht lesen und `npm run lesen` nicht starten | andere KI-Werkzeuge kennen die Datei nicht |
 | CI (`npm test`) | dieselbe Prüfung ohne `ersetzen.txt` | läuft erst **nach** dem Push |
+
+### Erkennbare Testdaten — nur aus dem Pool
+
+Alles Erfundene unter `test/` kommt aus einem festen Pool (`scripts/testdaten.mjs`). Wer es liest, sieht sofort: erfunden. Ein echter Wert fällt auf, weil er nicht im Pool steht. `--anonym` schreibt Pool-Werte.
+
+| Art | Pool | Beispiel |
+|---|---|---|
+| Vornamen | Max, Erika, Moritz, Lisa, Paul, Mia, Tom, Lena, Ben, Anna, Peter | |
+| Nachnamen | Mustermann, Musterfrau, Muster, Beispiel | `Max Mustermann`, `MUSTERFRAU/ERIKA` |
+| Geburtsdatum | 01.01. + Jahr (Alter bleibt) | `01.01.2012` |
+| Straße | Musterstraße + Nummer | `Musterstraße 1` |
+| PLZ Ort | 12345 Musterstadt | `D - 12345 Musterstadt` |
+| Telefon | nur Ziffern 0 und 1 | `+49 000 1111111` |
+| E-Mail | `@example.com` (auch .org, .net, .test) | `kontakt1@example.com` |
+| IBAN | Prüfziffer falsch | `DE00 1234 5678 9012 3456 78` |
+| Buchungs-, Kunden-, Ticketnummer | Neunen, Länge bleibt | `999888777` |
+| Reisebüro | Reisebüro Muster GmbH | |
+
+Die Commit-Sperre prüft unter `test/`: Namen nach Herr/Frau/Kind und `NACHNAME/VORNAME`, Geburtsdaten, PLZ Ort, Telefon. Nicht aus dem Pool → Commit abgebrochen.
+
+| Ausnahme | Wo |
+|---|---|
+| Anschrift, Hotline eines Veranstalters | `ERLAUBTE_ORTE`, `ERLAUBTE_TELEFONE` in `scripts/testdaten.mjs` |
+| Platzhalter des Veranstalters (`Tba Tbab`) | erkannt, keine Eintragung nötig |
+| Tests der Sperre selbst (brauchen echt aussehende Gegenbeispiele) | `NUR_GEGENBEISPIELE` |
+
+Nicht geprüft: Namen ohne Anrede („1 Max Mustermann 30“ bei DERTOUR), Straßen ohne PLZ-Zeile, Reisedaten. Darum bleibt Schritt 3.
 
 **Panne** (echte Angabe gepusht): sofort Frank. Nicht selbst „wegcommitten“ — der alte Stand bleibt abrufbar. Repository auf privat stellen, Verlauf bereinigen; ob gemeldet werden muss (DSGVO Art. 33, 72 h), entscheidet der Verantwortliche.
 
@@ -93,24 +120,26 @@ Entwurf: …
 Danach trotzdem Schritt 3. Von Hand, je Zeile `echt = erfunden`:
 
 ```
+# links: genau so, wie es im Beleg steht — rechts: aus dem Pool
 # Personen — Vor- und Nachnamen einzeln, auch Mitreisende und Kinder
-Schmidt = Musterfrau
-Petra = Erika
-Jonas = Max
+<Nachname> = Mustermann
+<Vorname> = Max
+<Vorname Kind> = Mia
 # Anschrift
-Lindenstraße 5 = Testweg 1
-74072 Heilbronn = 12345 Teststadt
-# Nummern so, wie sie im Beleg stehen
-4711123/1 = 9999999/1
-12.04.1981 = 01.01.1970
-DE12 3456 … = DE00 1234 5678 9012 3456 78
-<E-Mail aus dem Beleg> = erika@example.com
+<Straße Nr> = Musterstraße 1
+<PLZ Ort> = 12345 Musterstadt
+# Nummern, Daten
+<Buchungsnummer> = 999888777
+<Geburtsdatum> = 01.01.<Jahr>
+<IBAN> = DE00 1234 5678 9012 3456 78
+<E-Mail> = kontakt1@example.com
+<Telefon> = +49 000 1111111
 ```
 
 ```bash
 npm run lesen -- privat/beleg.pdf
 # Muster: privat/beleg.muster.txt  (9 Ersetzungen — jetzt lesen, Rest von Hand ersetzen)
-#   ⚠ Zeile 41: Mobilnummer 0171 … — erfunden: +49 700 1234567
+#   ⚠ Zeile 41: Mobilnummer 0171 … — erfunden: +49 000 1111111
 ```
 
 - Ersetzt ganze Wörter, Groß/klein egal; `SCHMIDT` wird `MUSTERFRAU`
@@ -238,7 +267,8 @@ Commit-Sperre meldet sich:
 
 ```
 ✗ Datenschutz: 1 Fund(e) — Commit abgebrochen
-  test/fixtures/aida-muster.txt:8  „Schmidt“ steht in privat/ersetzen.txt (echte Angabe)
+  test/fixtures/aida-muster.txt:8  „<Nachname>“ steht in privat/ersetzen.txt (echte Angabe)
+  test/fixtures/aida-muster.txt:12  Name „<Vorname>“ nicht aus dem Pool — erfunden: Max Mustermann
 ```
 
 → Stelle ersetzen, `git add`, neu committen. Firmen-E-Mail eines Veranstalters → `ERLAUBTE_DOMAINS` in `scripts/datenschutz.mjs`.

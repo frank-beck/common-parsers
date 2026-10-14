@@ -6,9 +6,11 @@
 // Findet nicht: Namen, die der Parser nicht kennt und die keinem Muster folgen —
 // darum das Muster danach trotzdem lesen (docs/neuer-parser.md, Schritt 3).
 import { ERLAUBTE_DOMAINS, alsWort } from './datenschutz.mjs';
+import { POOL } from './testdaten.mjs';
 
-const VORNAMEN = ['Max', 'Erika', 'Lena', 'Paul', 'Mia', 'Tom', 'Anna', 'Ben', 'Lea', 'Jan'];
-const NACHNAMEN = ['Mustermann', 'Musterfrau', 'Beispiel', 'Muster'];
+// Ersatzwerte aus dem Pool (scripts/testdaten.mjs): erkennbar erfunden, die Commit-Sperre lässt sie durch
+const VORNAMEN = POOL.vornamen;
+const NACHNAMEN = POOL.nachnamen;
 // Kein Name: Anrede, Platzhalter („Tba“ bei DERTOUR), Ersatznamen der Parser
 const KEIN_NAME = /^(?:herr|herrn|frau|kind|tba|reisende\/r|dr\.?|prof\.?)$/i;
 
@@ -17,7 +19,7 @@ const IBAN = /\b[A-Z]{2}\d{2}(?: ?[A-Z0-9]{4}){3,7}(?: ?[A-Z0-9]{1,3})?\b/g;
 // auch „+49 (0)7000 …“, „(+49) (0)30 – …“
 const TELEFON = /(?:\(?\+\d{2}\)?|\b0)[\d ()/–-]{6,22}\d\b/g;
 const NUMMER = /(?<![\p{L}\p{N}])([A-Z]{0,4})(\d{6,20})(?![\p{L}\p{N}])/gu;
-// „12345 Teststadt“, „D - 12345 Teststadt“; „Lindenweg 5“, „Am Tal 16/1“
+// „12345 Musterstadt“, „D - 12345 Musterstadt“; „Lindenweg 5“, „Am Tal 16/1“
 const ORT = /^(?:[A-Z]{1,2}\s?-\s?)?\d{4,5}\s+\p{Lu}[\p{L} .-]{1,40}$/u;
 const STRASSE = /^\p{Lu}[\p{L} .-]{2,40}\s\d{1,4}(?:\/\d{1,3})?\s?[a-z]?$/u;
 // „5 Kind Mia Muster (01.06.2016)“ — auch wenn der Parser die Zeile nicht kennt
@@ -38,6 +40,8 @@ export function ersetzungen(draft, text) {
     if (key.length >= 3 && !paare.has(key)) paare.set(key, { echt: echt.trim(), erfunden, art });
   };
 
+  let strasse = 0;
+  const naechsteStrasse = () => `${POOL.strasse} ${++strasse}`;
   let vorname = 0;
   let nachname = 0;
   const zeilenTeilnehmer = [...text.matchAll(TEILNEHMER)];
@@ -51,31 +55,33 @@ export function ersetzungen(draft, text) {
     });
   }
   for (const { birthDate } of draft.participants) {
-    if (birthDate) neu(isoAlsDeutsch(birthDate), `01.01.${birthDate.slice(0, 4)}`, 'Geburtsdatum');
+    if (birthDate) neu(isoAlsDeutsch(birthDate), `${POOL.geburtsdatum}${birthDate.slice(0, 4)}`, 'Geburtsdatum');
   }
-  for (const [, , datum] of zeilenTeilnehmer) neu(datum, `01.01.${datum.slice(-4)}`, 'Geburtsdatum');
+  for (const [, , datum] of zeilenTeilnehmer) neu(datum, `${POOL.geburtsdatum}${datum.slice(-4)}`, 'Geburtsdatum');
 
   for (const contact of draft.contacts.filter((c) => c.kind === 'ADVISOR')) {
-    if (contact.name) neu(contact.name, 'Reisebüro Muster GmbH', 'Reisebüro');
+    if (contact.name) neu(contact.name, POOL.reisebuero, 'Reisebüro');
   }
   const kunde = draft.customer;
-  if (kunde.address) neu(kunde.address, 'Testweg 1, 12345 Teststadt', 'Anschrift');
+  if (kunde.address) neu(kunde.address, `${naechsteStrasse()}, ${POOL.ort}`, 'Anschrift');
 
   let mail = 0;
   for (const [adresse, domain] of text.matchAll(EMAIL)) {
     if (!ERLAUBTE_DOMAINS.includes(domain.toLowerCase())) neu(adresse, `kontakt${++mail}@example.com`, 'E-Mail');
   }
-  for (const [iban] of text.matchAll(IBAN)) neu(iban, 'DE00 1234 5678 9012 3456 78', 'IBAN');
+  for (const [iban] of text.matchAll(IBAN)) neu(iban, POOL.iban, 'IBAN');
   // Vor den Nummern: sonst bleiben von „0711 1234567“ nur Bruchstücke
   for (const [telefon] of text.matchAll(TELEFON)) {
-    // Ersatz ohne 6 Ziffern am Stück, sonst ersetzt NUMMER ihn noch einmal
-    if (telefon.replace(/\D/g, '').length >= 8) neu(telefon, '+49 700 123 4567', 'Telefon');
+    // Ersetzt wird der Reihe nach: eine echte Nummer, die als Teil im Ersatz steht, träfe den Ersatz.
+    // Pool-Ziffern (nur 0/1) überspringt NUMMER darum, siehe unten.
+    if (telefon.replace(/\D/g, '').length >= 8) neu(telefon, POOL.telefon, 'Telefon');
   }
   for (const [, wert] of text.matchAll(BELEGNUMMER)) {
     if (/\d/.test(wert)) neu(wert, wert.replace(/\d/g, '9'), 'Nummer');
   }
   let nummer = 0;
   for (const [ganz, prefix, ziffern] of text.matchAll(NUMMER)) {
+    if (/^[01]+$/.test(ziffern)) continue; // Pool, nicht echt
     const ersatz = String(++nummer).padStart(ziffern.length, '9');
     neu(ganz, `${prefix}${ersatz}`, 'Nummer');
   }
@@ -83,9 +89,9 @@ export function ersetzungen(draft, text) {
   const zeilen = text.split('\n').map((zeile) => zeile.trim());
   zeilen.forEach((zeile, index) => {
     if (!ORT.test(zeile)) return;
-    neu(zeile, '12345 Teststadt', 'Anschrift');
+    neu(zeile, POOL.ort, 'Anschrift');
     const davor = zeilen[index - 1] ?? '';
-    if (STRASSE.test(davor)) neu(davor, 'Testweg 1', 'Anschrift');
+    if (STRASSE.test(davor)) neu(davor, naechsteStrasse(), 'Anschrift');
   });
 
   // Längste zuerst, wie lesen.mjs ersetzt: „0711 1234567“ vor „1234567“

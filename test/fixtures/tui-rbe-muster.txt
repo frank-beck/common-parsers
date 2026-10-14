@@ -7,11 +7,11 @@ Reisebüro Muster GmbH
 Preisübersicht
 Teilnehmerpreise
 Teilnehmer Preis
-1 Herr Max Mustermann (18.12.1971) 5.670,00 €
-2 Frau Erika Musterfrau (18.12.1976) 5.509,00 €
-3 Herr Lena Beispiel (18.12.2010) 2.973,00 €
-4 Frau Paul Mustermann (18.12.2012) 2.339,00 €
-5 Kind Mia Mustermann (18.12.2015) 2.486,00 €
+1 Herr Max Mustermann (01.01.1971) 5.670,00 €
+2 Frau Erika Musterfrau (01.01.1976) 5.509,00 €
+3 Herr Lena Beispiel (01.01.2010) 2.973,00 €
+4 Frau Paul Mustermann (01.01.2012) 2.339,00 €
+5 Kind Mia Mustermann (01.01.2015) 2.486,00 €
 Gesamtpreis 18.977,00 €
 Zahlungsinformationen#
 Zahlungsart: Inkasso durch Reisebüro Gesamtpreis: 18.977,00 €
@@ -48,9 +48,9 @@ Wichtige Information für Familienreisen Kinder unter zwei Jahren haben keinen A
 eigenen Sitzplatz im Flugzeug und reisen auf dem Schoß eines Erwachsenen. Wird Ihr Kind während der
 Reise zwei Jahre alt, benötigt es ab diesem Zeitpunkt einen eigenen Sitzplatz im Flugzeug. Bitte setzen
 Buchungsbestätigung/Rechnung
-TUI Deutschland GmbH · Testweg 1 · DE - 12345 Teststadt
+TUI Deutschland GmbH · Musterstraße 1 · DE - 12345 Musterstadt
 TUI Deutschland GmbH, AG Hannover · HRB 62522 · Ust-Id. Nr. DE 242 380 569 · Vorsitzender des Aufsichtsrates: Mathias Kiep
-Geschäftsführung: Benjamin Jacobi (Vorsitzender), Dr. Susanne Gauglitz · Telefonnummer: +49 700 123 4567 · E-Mail-Adresse: fragenvorderreise@tui.de Seite 1/5
+Geschäftsführung: Benjamin Jacobi (Vorsitzender), Dr. Susanne Gauglitz · Telefonnummer: +49 000 1111111 · E-Mail-Adresse: fragenvorderreise@tui.de Seite 1/5
 Buchung: 99999991 | Vertrags-/Versicherungsbeginn: 16.02.2027 | Ansprechpartner ID: 0002 | Agentur ID: 999992 | Datum: 23.09.2026 09:21 Uhr
 
 === Seite 2 ===
@@ -133,9 +133,9 @@ Asien / Süd Thaiand / Golf: Bitte beachten Sie, dass mitgeführtes Golfgepäck 
 Pauschalreise auf dem Hoteltransfer angemeldet werden muss. Ihr Reisebüro übernimmt die Anmeldung
 über das Buchungssystem, so ist die Beförderung Ihres Golfbags vom Flughafen zu ihrem gebuchten
 Buchungsbestätigung/Rechnung
-TUI Deutschland GmbH · Testweg 1 · DE - 12345 Teststadt
+TUI Deutschland GmbH · Musterstraße 1 · DE - 12345 Musterstadt
 TUI Deutschland GmbH, AG Hannover · HRB 62522 · Ust-Id. Nr. DE 242 380 569 · Vorsitzender des Aufsichtsrates: Mathias Kiep
-Geschäftsführung: Benjamin Jacobi (Vorsitzender), Dr. Susanne Gauglitz · Telefonnummer: +49 700 123 4567 · E-Mail-Adresse: fragenvorderreise@tui.de Seite 2/5
+Geschäftsführung: Benjamin Jacobi (Vorsitzender), Dr. Susanne Gauglitz · Telefonnummer: +49 000 1111111 · E-Mail-Adresse: fragenvorderreise@tui.de Seite 2/5
 Buchung: 99999991 | Vertrags-/Versicherungsbeginn: 16.02.2027 | Ansprechpartner ID: 0002 | Agentur ID: 999992 | Datum: 23.09.2026 09:21 Uhr
 (Fortsetzung)
 
@@ -217,9 +217,9 @@ Sitzplatzreservierung: 21D, 20E, 20F, 20D, 20G 1
 66,00 €
 04.03.2027 Kostenloses Zug zum Flug 2. Klasse Hin- und Rückfahrt (ZZFXZR2U) 1–5 0,00 € bestätigt
 Buchungsbestätigung/Rechnung
-TUI Deutschland GmbH · Testweg 1 · DE - 12345 Teststadt
+TUI Deutschland GmbH · Musterstraße 1 · DE - 12345 Musterstadt
 TUI Deutschland GmbH, AG Hannover · HRB 62522 · Ust-Id. Nr. DE 242 380 569 · Vorsitzender des Aufsichtsrates: Mathias Kiep
-Geschäftsführung: Benjamin Jacobi (Vorsitzender), Dr. Susanne Gauglitz · Telefonnummer: +49 700 123 4567 · E-Mail-Adresse: fragenvorderreise@tui.de Seite 3/5
+Geschäftsführung: Benjamin Jacobi (Vorsitzender), Dr. Susanne Gauglitz · Telefonnummer: +49 000 1111111 · E-Mail-Adresse: fragenvorderreise@tui.de Seite 3/5
 Buchung: 99999991 | Vertrags-/Versicherungsbeginn: 16.02.2027 | Ansprechpartner ID: 0002 | Agentur ID: 999992 | Datum: 23.09.2026 09:21 Uhr
 (Fortsetzung)
 
@@ -239,18 +239,18 @@ Account können Sie jederzeit selbst löschen oder löschen lassen. Weitere Info
 ** destinationsabhängig
 Ihre Daten# Agentur oder Reisebüro#
 Herr Max Mustermann
-Testweg 2
-D - 12345 Teststadt
-Telefon: +49 (0)700 1234567
-Telefon Mobil: +49 (0)700 1234567
+Musterstraße 2
+D - 12345 Musterstadt
+Telefon: +49 (0)000 1111111
+Telefon Mobil: +49 (0)000 1111111
 E-Mail: kontakt1@example.com
-Kundennummer: +49 700 123 4567
+Kundennummer: +49 000 1111111
 Rechnungsnummer: 9999999910/1
 Versand des Reiseplans: An das Reisebüro
 Reisebüro Muster GmbH
-Testweg 3
-D - 12345 Teststadt
-Telefon: +49 (0)700 7654321
+Musterstraße 3
+D - 12345 Musterstadt
+Telefon: +49 (0)000 1111110
 E-Mail: kontakt2@example.com
 Steuernr.: 12345/67890
 Wichtige Buchungsinformationen#
@@ -275,7 +275,7 @@ teil.
 Wir empfehlen Ihnen den Abschluss einer Reiserücktrittskosten-Versicherung und einer Versicherung zur Deckung der Kosten einer Unterstützung einschließlich
 einer Rückbeförderung bei Unfall, Krankheit oder Tod. Ihr Reisebüro oder das Service Center Ihres Online-Reiseportals helfen Ihnen gern weiter.
 Buchungsbestätigung/Rechnung
-TUI Deutschland GmbH · Testweg 1 · DE - 12345 Teststadt
+TUI Deutschland GmbH · Musterstraße 1 · DE - 12345 Musterstadt
 TUI Deutschland GmbH, AG Hannover · HRB 62522 · Ust-Id. Nr. DE 242 380 569 · Vorsitzender des Aufsichtsrates: Mathias Kiep
-Geschäftsführung: Benjamin Jacobi (Vorsitzender), Dr. Susanne Gauglitz · Telefonnummer: +49 700 123 4567 · E-Mail-Adresse: fragenvorderreise@tui.de Seite 4/5
+Geschäftsführung: Benjamin Jacobi (Vorsitzender), Dr. Susanne Gauglitz · Telefonnummer: +49 000 1111111 · E-Mail-Adresse: fragenvorderreise@tui.de Seite 4/5
 Buchung: 99999991 | Vertrags-/Versicherungsbeginn: 16.02.2027 | Ansprechpartner ID: 0002 | Agentur ID: 999992 | Datum: 23.09.2026 09:21 Uhr

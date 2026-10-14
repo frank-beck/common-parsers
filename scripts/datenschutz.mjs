@@ -9,6 +9,7 @@
 // - keine Angabe aus privat/ersetzen.txt (linke Seite: echte Namen, Nummern, Adressen)
 // - E-Mail-Adressen nur mit erfundener Domain oder aus ERLAUBTE_DOMAINS
 // - keine gültige IBAN, keine Mobilnummer
+// - unter test/: Namen, Geburtsdaten, Anschriften, Telefon nur aus dem Pool (scripts/testdaten.mjs)
 //
 // Was sie nicht findet: echte Daten, die nicht in privat/ersetzen.txt stehen und
 // keinem Muster folgen — ein Name, ein Geburtsdatum. Darum bleibt das Lesen
@@ -17,6 +18,7 @@ import { execFileSync } from 'node:child_process';
 import { existsSync, lstatSync, readFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { NUR_GEGENBEISPIELE, pruefeTestdaten } from './testdaten.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -91,9 +93,15 @@ export function pruefe(files, echt = []) {
         if (gueltigeIban(iban)) melde(path, line, `gültige IBAN ${iban} — erfunden: DE00 1234 5678 9012 3456 78`);
       }
       for (const [nummer] of text.matchAll(MOBIL)) {
-        melde(path, line, `Mobilnummer ${nummer.trim()} — erfunden: +49 700 1234567`);
+        melde(path, line, `Mobilnummer ${nummer.trim()} — erfunden: +49 000 1111111`);
       }
     });
+    if (path.startsWith('test/') && !NUR_GEGENBEISPIELE.has(path)) {
+      const text = content.toString('utf8');
+      for (const { index, problem } of pruefeTestdaten(text)) {
+        melde(path, text.slice(0, index).split('\n').length, problem);
+      }
+    }
   }
   return befunde;
 }

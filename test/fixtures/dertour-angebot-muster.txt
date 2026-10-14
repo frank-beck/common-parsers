@@ -5,9 +5,9 @@ Seite 1 von 7
 Bei Fragen zu Ihrer Buchung wenden Sie sich bitte an die
 Buchungsstelle:
 Reisebüro Muster GmbH
-Testweg 1
-12345 Teststadt
-Telefon: 012345678900
+Musterstraße 1
+12345 Musterstadt
+Telefon: +49 000 1111110
 E-Mail: info@reisebuero.example
 Rechnungsnummer: KB999888777004
 Leistungsbeginn: 03.02.2027
@@ -33,9 +33,9 @@ Max
 Reisende/r Name Alter/Geburtsdatum Reisepreis
 1 Max Mustermann 30 3.170,00 EUR
 2 Tba Tbab 30 3.519,00 EUR
-3 Kind Tba Tbac 15/03.02.2012 3.170,00 EUR
-4 Kind Tba Tbad 13/03.02.2014 2.191,00 EUR
-5 Kind Tba Tbae 10/03.02.2017 2.535,00 EUR
+3 Kind Tba Tbac 15/01.01.2012 3.170,00 EUR
+4 Kind Tba Tbad 13/01.01.2014 2.191,00 EUR
+5 Kind Tba Tbae 10/01.01.2017 2.535,00 EUR
 Reisepaket
 Pos. Anz. Leistung Datum Reisende/r Einzelpreis Gesamtpreis
 1 5 Rail & Fly 2.Klasse von 03.02.2027

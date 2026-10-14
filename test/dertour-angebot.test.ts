@@ -40,9 +40,9 @@ describe('DERTOUR Angebot', () => {
       [
         ['Max Mustermann', 'PRIMARY', null],
         ['Reisende/r 2', 'COMPANION', null],
-        ['Kind 3', 'CHILD', '2012-02-03'],
-        ['Kind 4', 'CHILD', '2014-02-03'],
-        ['Kind 5', 'CHILD', '2017-02-03']
+        ['Kind 3', 'CHILD', '2012-01-01'],
+        ['Kind 4', 'CHILD', '2014-01-01'],
+        ['Kind 5', 'CHILD', '2017-01-01']
       ]
     );
     assert.deepEqual(warnings, ['Reisende 2, 3, 4, 5 ohne Namen (Platzhalter „Tba“) — Namen nachtragen.']);
@@ -100,7 +100,7 @@ describe('DERTOUR Angebot', () => {
     const advisor = draft.contacts.find((contact) => contact.kind === 'ADVISOR');
     assert.deepEqual(
       [advisor?.name, advisor?.phone, advisor?.email, advisor?.address],
-      ['Reisebüro Muster GmbH', '012345678900', 'info@reisebuero.example', 'Testweg 1, 12345 Teststadt']
+      ['Reisebüro Muster GmbH', '+49 000 1111110', 'info@reisebuero.example', 'Musterstraße 1, 12345 Musterstadt']
     );
   });
 });

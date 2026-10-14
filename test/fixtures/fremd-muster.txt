@@ -5,8 +5,8 @@ Ihre Reise: 7 Nächte - Testroute Mittelamerika - ab/bis Belize City
 Ihr Reisedatum: 04.05. - 12.05.2028
 Frau
 ERIKA MUSTERFRAU
-TESTWEG 1
-12345 TESTSTADT
+MUSTERSTRASSE 1
+12345 MUSTERSTADT
 Reisebestätigung / Rechnung
 Vorgang-Nr.: 9999999/1
 Datum: 01.03.2027
@@ -14,10 +14,10 @@ Bitte wenden Sie sich für Fragen und
 Änderungswünsche an:
 Musterreisen GmbH
 .
-Tel: +49 700 1234567
+Tel: +49 000 1111111
 Teilnehmer Preis pro Person Alter/Geburtsdatum
 1.000,00 € 1. Frau MUSTERFRAU/ERIKA 01.01.1970
-1.000,00 € 2. Herr MUSTERMANN/MAX 02.02.1972
+1.000,00 € 2. Herr MUSTERMANN/MAX 01.01.1972
 1-2 04.05.2028 -
 11.05.2028
 Mein Schiff 9
@@ -40,7 +40,7 @@ danke, dass Sie mit TUI Deutschland GmbH verreisen möchten!
 Musterreisen GmbH
 Teilnehmerpreise
 1 Frau Erika Musterfrau (01.01.1970) 900,00 €
-2 Herr Max Mustermann (02.02.1972) 900,00 €
+2 Herr Max Mustermann (01.01.1972) 900,00 €
 Gesamtpreis 1.800,00 €
 Zahlungsinformationen #
 Zahlungsart: Kreditkarte (Mastercard) Gesamtpreis: 1.800,00 €

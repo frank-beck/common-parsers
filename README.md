@@ -48,14 +48,14 @@ Die App liest dann direkt aus diesem `dist/`. Nach jeder Änderung `npm run buil
 src/core/       Vertrag (draft.ts), Textwerkzeuge, pdfjs-Aufbereitung, Auswahl
 src/parsers/    ein Parser je Datei, Liste in index.ts
 src/runtime.ts  was die App neben den Parsern braucht
-scripts/        build, sign, verify, keygen, lesen, neu, datenschutz; entries.mjs = was gebaut wird
-test/           nur synthetische Belege (Musterfrau, Musterreisen GmbH), test/fixtures/*-muster.*
+scripts/        build, sign, verify, keygen, lesen, anonym, neu, datenschutz, testdaten; entries.mjs = was gebaut wird
+test/           nur erfundene Belege aus dem Pool (scripts/testdaten.mjs), test/fixtures/*-muster.*
 privat/         echte Belege, nur lokal — von git ausgeschlossen
 ```
 
 ## Regeln
 
-- **Nur erfundene Testdaten.** Dieses Repository ist öffentlich. Echte Belege, Namen, Buchungsnummern gehören nirgendwo hierher — auch nicht im Git-Verlauf. Echte Belege nur in `privat/`; Ablauf und Sperren: [neuer-parser.md](docs/neuer-parser.md#datenschutz--zuerst-lesen)
+- **Nur erfundene Testdaten, erkennbar aus dem Pool** (Max Mustermann, Musterstraße 1, 12345 Musterstadt, +49 000 1111111). Dieses Repository ist öffentlich. Echte Belege, Namen, Buchungsnummern gehören nirgendwo hierher — auch nicht im Git-Verlauf. Echte Belege nur in `privat/`; Ablauf und Sperren: [neuer-parser.md](docs/neuer-parser.md#datenschutz--zuerst-lesen)
 - Parser sind reine Funktionen: kein `fetch`, kein `import()`, keine Node-APIs. `test/dist.test.ts` prüft das an den gebauten Modulen
 - Jede Änderung am Ergebnis eines Parsers hebt dessen `version`
 - Release nur über Tag `v<package.json-version>` → [release.yml](.github/workflows/release.yml)
