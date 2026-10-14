@@ -2,7 +2,7 @@ import type { DocumentParser, DraftEvidence, DraftItem, DraftParticipant, DraftT
 import { emptyDraft } from '../core/draft.js';
 import type { PdfPage } from '../core/pdf-text.js';
 import { joinedText } from '../core/pdf-text.js';
-import { collapse, euroCents, germanDate, guessRegion, matchAll, matchFirst, shiftDate } from '../core/text.js';
+import { EXCERPT_MAX, collapse, euroCents, germanDate, guessRegion, matchAll, matchFirst, shiftDate } from '../core/text.js';
 
 const DATE = '\\d{1,2}\\.\\d{1,2}\\.\\d{4}';
 const STATUS = 'Angebot';
@@ -47,7 +47,7 @@ function positions(lines: readonly Line[]): { header: string; lines: Line[] }[] 
 }
 
 function evidenceOf(lines: readonly Line[]): DraftEvidence {
-  return { page: lines[0]?.page ?? 1, excerpt: collapse(lines.slice(0, 3).map((line) => line.text).join(' ')) };
+  return { page: lines[0]?.page ?? 1, excerpt: collapse(lines.slice(0, 3).map((line) => line.text).join(' ')).slice(0, EXCERPT_MAX) };
 }
 
 const FLIGHT_ROW = new RegExp(

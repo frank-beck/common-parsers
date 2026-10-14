@@ -7,10 +7,12 @@ export interface Match {
 }
 
 const EXCERPT_RADIUS = 60;
+/** NADIA lehnt Auszüge über 1000 Zeichen ab (ImportDraftRules) — und mit ihnen den ganzen Entwurf. */
+export const EXCERPT_MAX = 400;
 
 function excerptAround(text: string, index: number, length: number): string {
   const start = Math.max(0, index - EXCERPT_RADIUS);
-  const end = Math.min(text.length, index + length + EXCERPT_RADIUS);
+  const end = Math.min(text.length, index + length + EXCERPT_RADIUS, start + EXCERPT_MAX);
   return `${start > 0 ? '…' : ''}${text.slice(start, end).replace(/\s+/g, ' ').trim()}${end < text.length ? '…' : ''}`;
 }
 

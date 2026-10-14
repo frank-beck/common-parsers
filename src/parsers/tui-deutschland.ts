@@ -239,7 +239,7 @@ function parseTasks(
 
 export const tuiDeutschlandParser: DocumentParser = {
   id: 'tui-deutschland',
-  version: '1.1.0',
+  version: '1.1.1',
   family: 'TUI Deutschland',
   label: 'TUI Deutschland — Buchungsbestätigung / Rechnung',
 

@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'vitest';
-import { euroCents, germanDate, personName, shiftDate } from '../src/core/text.js';
+import { euroCents, germanDate, matchAll, personName, shiftDate } from '../src/core/text.js';
 
 describe('Textwerkzeuge', () => {
   it('liest deutsche Datumsangaben', () => {
@@ -25,5 +25,12 @@ describe('Textwerkzeuge', () => {
   it('dreht Namen aus der Veranstalterschreibweise', () => {
     assert.equal(personName('MUSTERFRAU/ERIKA'), 'Erika Musterfrau');
     assert.equal(personName('Frau Erika Musterfrau'), 'Erika Musterfrau');
+  });
+
+  it('kürzt Fundstellen langer Treffer', () => {
+    const text = `Beginn ${'Zeile mit Text\n'.repeat(200)}Ende`;
+    const [hit] = matchAll([{ pageNumber: 1, text }], /Beginn[\s\S]*Ende/);
+    assert.ok(hit && hit.evidence.excerpt.startsWith('Beginn Zeile'));
+    assert.ok(hit.evidence.excerpt.length <= 401, `${hit.evidence.excerpt.length} Zeichen`);
   });
 });
