@@ -2,6 +2,7 @@ import type { DocumentParser } from '../core/draft.js';
 import { genericParser } from './generic.js';
 import { tuiCruisesParser } from './tui-cruises.js';
 import { tuiDeutschlandParser } from './tui-deutschland.js';
+import { dertourAngebotParser } from './dertour-angebot.js';
 
 /**
  * Alle Parser dieses Repositorys. Der Build macht aus jedem Eintrag ein
@@ -9,4 +10,4 @@ import { tuiDeutschlandParser } from './tui-deutschland.js';
  * gebaut — `npm run neu` erledigt das, siehe docs/neuer-parser.md. Der Build liest scripts/entries.mjs;
  * ein Test prüft, dass beide Listen übereinstimmen.
  */
-export const parsers: readonly DocumentParser[] = [tuiCruisesParser, tuiDeutschlandParser, genericParser];
+export const parsers: readonly DocumentParser[] = [tuiCruisesParser, tuiDeutschlandParser, dertourAngebotParser, genericParser];
