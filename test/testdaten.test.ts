@@ -19,7 +19,9 @@ describe('Testdaten aus dem Pool', () => {
       'TUI Deutschland GmbH · Karl-Wiechert-Allee 23 · DE - 30625 Hannover',
       'IBAN: DE00 1234 5678 9012 3456 78 · SWIFT/BIC: COBADEFFXXX',
       'Steuernr.: 12345/67890',
-      'Gesamtpreis 18.977,00 € · 0,00 € · PG 0275, 07.03.2027 12:00 Uhr'
+      'Gesamtpreis 18.977,00 € · 0,00 € · PG 0275, 07.03.2027 12:00 Uhr',
+      'BEIBLATT ZUR REISEBESTÄTIGUNG/RECHNUNG',
+      'Seite: 0002 1 / 5'
     ].join('\n');
     assert.deepEqual(funde(text), []);
   });

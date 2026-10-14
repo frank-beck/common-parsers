@@ -174,6 +174,7 @@ Platzhalter durch die echten Werte ersetzen. Kein `#`-Kommentar dahinter (zsh li
 |---|---|
 | TUI Deutschland | Anrede Seite 1 · Teilnehmerliste „1 Herr …“ bis „5 Kind …“ · Block „Ihre Daten# Agentur oder Reisebüro#“ (Anschrift, Telefon, Mobil, E-Mail, Kunden-, Rechnungs-, Steuernummer) |
 | DERTOUR | Kopf Seite 1 („Buchungsstelle“, Rechnungs-, Vorgangsnummer) · Anrede · „Anmelder/in“ und Reisendenliste · Freigepäck · Flug-/Airline-Buchungscode |
+| Schauinsland | Reisebüro im Kopf (jede Seite) · „Reiseteilnehmer Alter“ (Geburtsdatum `TT.MM.JJ`) · „Kunde:“ und „Kundentelefonnummer“ (jede Seite) · Kennwort „mein-schauinsland“ · Lastschriftmandat (Name, Strasse, Ort, BIC, IBAN, Mandatsreferenz) · „AGENT.NR./KUND.NR.“ · Bankdaten der Vorabinformation · Vorstand im Sicherungsschein |
 | neuer Veranstalter | Kopf, Anrede, Teilnehmerliste, Kontaktblock, jede Zeile mit Nummer; danach hier eintragen |
 
 **c) Rest überfliegen:** Steht irgendwo noch ein Name, eine Nummer, ein Geburtsdatum?
@@ -184,6 +185,7 @@ Fund → in `ersetzen.txt` nachtragen, Schritt 2 wiederholen.
 |---|---|
 | Geschäftsführung, HRB, USt-ID, Anschrift, Hotline des **Veranstalters** | alles zu Kundschaft und Mitreisenden |
 | Hotels, Flugnummern, Sitzplätze, Preise | Reisebüro: Name, Anschrift, Telefon, Steuernummer, Beratung |
+| | Kennwörter und Zugangscodes (Kundenportal) |
 | Platzhalter des Veranstalters („Tba“ bei DERTOUR) | Buchungs-, Rechnungs-, Kunden-, Ticketnummern |
 
 Faustregel: Steht es so auf jedem Beleg des Veranstalters → bleibt. Betrifft es nur diese Buchung → raus.

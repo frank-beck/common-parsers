@@ -135,7 +135,7 @@ const COUNTRY_BY_KEYWORD: readonly (readonly [RegExp, string, string])[] = [
   [/\b(?:Mallorca|Palma|Spanien|Barcelona)\b/i, 'Spanien', 'Europe/Madrid'],
   [/\b(?:Madeira|Funchal|Portugal|Lissabon)\b/i, 'Portugal', 'Europe/Lisbon'],
   [/\b(?:Italien|Bologna|Rom|Sizilien|Palermo|Sardinien|Cagliari|Neapel)\b/i, 'Italien', 'Europe/Rome'],
-  [/\b(?:Griechenland|Kreta|Rhodos|Athen)\b/i, 'Griechenland', 'Europe/Athens'],
+  [/\b(?:Griechenland|Kreta|Rhodos|Athen|Thessaloniki|Chalkidiki)\b/i, 'Griechenland', 'Europe/Athens'],
   [/\b(?:Türkei|Antalya|Istanbul)\b/i, 'Türkei', 'Europe/Istanbul'],
   [/\b(?:Japan|Tokio|Tokyo)\b/i, 'Japan', 'Asia/Tokyo'],
   [/\b(?:Namibia|Windhoek)\b/i, 'Namibia', 'Africa/Windhoek'],

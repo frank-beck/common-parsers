@@ -3,6 +3,7 @@ import { genericParser } from './generic.js';
 import { tuiCruisesParser } from './tui-cruises.js';
 import { tuiDeutschlandParser } from './tui-deutschland.js';
 import { dertourAngebotParser } from './dertour-angebot.js';
+import { schauinslandParser } from './schauinsland.js';
 
 /**
  * Alle Parser dieses Repositorys. Der Build macht aus jedem Eintrag ein
@@ -10,4 +11,4 @@ import { dertourAngebotParser } from './dertour-angebot.js';
  * gebaut — `npm run neu` erledigt das, siehe docs/neuer-parser.md. Der Build liest scripts/entries.mjs;
  * ein Test prüft, dass beide Listen übereinstimmen.
  */
-export const parsers: readonly DocumentParser[] = [tuiCruisesParser, tuiDeutschlandParser, dertourAngebotParser, genericParser];
+export const parsers: readonly DocumentParser[] = [tuiCruisesParser, tuiDeutschlandParser, dertourAngebotParser, schauinslandParser, genericParser];

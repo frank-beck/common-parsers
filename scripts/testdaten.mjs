@@ -18,8 +18,8 @@ export const POOL = {
 
 /** Platzhalter, die Veranstalter selbst einsetzen („Tba Tbab“ bei DERTOUR, Name folgt). */
 const PLATZHALTER = /^tba[a-z]?$/i;
-/** Großgeschrieben mit Schrägstrich, aber keine Person. */
-const KEINE_PERSON = new Set(['swift', 'bic']);
+/** Großgeschrieben mit Schrägstrich, aber keine Person: „SWIFT/BIC“, „REISEBESTÄTIGUNG/RECHNUNG“. */
+const KEINE_PERSON = new Set(['swift', 'bic', 'rechnung']);
 
 /** Anschriften und Hotlines von Veranstaltern: öffentlich, darf ein Parser kennen. */
 export const ERLAUBTE_ORTE = ['30625 Hannover', '20097 Hamburg', '51149 Köln', '51170 Köln'];
@@ -78,6 +78,8 @@ export function pruefeTestdaten(text) {
   for (const treffer of text.matchAll(TELEFON)) {
     const nummer = treffer[0].trim();
     if (nummer.replace(/\D/g, '').length < 6 || istPooltelefon(nummer) || ERLAUBTE_TELEFONE.includes(nummer)) continue;
+    // Seitenzähler „Seite: 0002 1 / 5“ (Schauinsland)
+    if (/Seite:?\s*$/.test(text.slice(Math.max(0, treffer.index - 8), treffer.index))) continue;
     melde(treffer.index, `Telefon „${nummer}“ — erfunden: ${POOL.telefon}; Veranstalter: ERLAUBTE_TELEFONE in scripts/testdaten.mjs`);
   }
   return funde;

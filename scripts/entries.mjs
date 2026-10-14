@@ -4,5 +4,6 @@ export const parserEntries = {
   'tui-cruises': 'src/parsers/tui-cruises.ts#tuiCruisesParser',
   'tui-deutschland': 'src/parsers/tui-deutschland.ts#tuiDeutschlandParser',
   'dertour-angebot': 'src/parsers/dertour-angebot.ts#dertourAngebotParser',
+  'schauinsland': 'src/parsers/schauinsland.ts#schauinslandParser',
   generic: 'src/parsers/generic.ts#genericParser'
 };
